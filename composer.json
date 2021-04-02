@@ -1,0 +1,18 @@
+{
+    "name": "lepiaf/imap-backup",
+    "description": "Tool to backup email from IMAP server",
+    "type": "project",
+    "license": "WTFPL",
+    "authors": [
+        {
+            "name": "Thierry T",
+            "email": "1940947+lepiaf@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "symfony/dotenv": "^5.2"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
+    }
+}
