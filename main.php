@@ -1,75 +1,34 @@
 <?php
 
-namespace App;
-
 require_once 'vendor/autoload.php';
 
+use App\Imap;
+use App\FileSystem;
 use Symfony\Component\Dotenv\Dotenv;
 
 $dotenv = new Dotenv();
 $dotenv->load(__DIR__.'/.env');
 
-$mbox = imap_open($_ENV['IMAP_MAILBOX'], $_ENV['IMAP_USER'], $_ENV['IMAP_PASSWORD'], OP_READONLY);
-if (false === $mbox) {
-    echo 'Cannot open mailbox.'.PHP_EOL;
-    exit(1);
-}
+$fileSystem = new FileSystem($_ENV['BACKUP_FOLDER']);
+$client = new Imap($_ENV['IMAP_MAILBOX'], $_ENV['IMAP_USER'], $_ENV['IMAP_PASSWORD']);
+$connection = $client->open();
 
-$mails = imap_search($mbox, 'ALL');
-if (false === $mails) {
-    echo 'Cannot get email list.'.PHP_EOL;
-    exit(1);
-}
+$exitCode = 0;
+foreach ($client->fetch($connection) as $mail) {
+    $fileName = $mail->getFileName();
 
-foreach ($mails as $mail) {
-    $info = imap_fetch_overview($mbox, $mail);
-    $fileName = getFileName($info);
-
-    if (true === file_exists(getPath($fileName)) && $info[0]->size === filesize(getPath($fileName))) {
+    if (true === $fileSystem->fileExists($mail)) {
         echo 'SKIPPING '.$fileName.PHP_EOL;
         continue;
     }
 
-    echo $fileName.PHP_EOL;
-    $result = imap_savebody($mbox, getPath($fileName), $mail);
+    $result = imap_savebody($connection, $fileSystem->getFilePath($fileName), $mail->getUid());
     if (false === $result) {
         echo 'ERROR Cannot save email '.$fileName.PHP_EOL;
-    }
-}
-
-function decode(?string $text): string {
-    if (!$text) {
-        return '<empty subject>';
+        $exitCode = 1;
     }
 
-    $elements = imap_mime_header_decode($text);
-    if (count($elements) === 0) {
-        return imap_utf8($text);
-    }
-
-    if ($elements[0]->charset === 'iso-8859-1') {
-        return mb_convert_encoding($elements[0]->text, 'UTF-8', 'iso-8859-1');
-    }
-
-    return imap_utf8($text);
+    echo 'SUCCESS save email '.$fileName.PHP_EOL;
 }
 
-function getPath(string $fileName): string {
-    return $_ENV['BACKUP_FOLDER'] . DIRECTORY_SEPARATOR . $fileName;
-}
-
-function getFileName(array $info): string {
-    return sprintf(
-        '%s_%s.eml',
-        $info[0]->uid,
-        substr(
-            str_replace(
-                '/',
-                '-',
-                decode($info[0]->subject)
-            ),
-            0,
-            180
-        )
-    );
-}
+exit($exitCode);
