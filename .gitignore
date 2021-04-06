@@ -1,3 +1,5 @@
 /data/
 /vendor/
 /.env.*
+/.phpunit.cache/
+/tests/dummy/
