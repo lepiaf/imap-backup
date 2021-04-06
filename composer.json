@@ -10,6 +10,9 @@
         }
     ],
     "require": {
+        "php": ">=7.4",
+        "ext-imap": "*",
+        "ext-mbstring": "*",
         "symfony/dotenv": "^5.2"
     },
     "require-dev": {
