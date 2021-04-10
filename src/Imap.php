@@ -10,11 +10,7 @@ use Generator;
 
 final class Imap
 {
-    public function __construct(
-        private $mailBox,
-        private $user,
-        private $password,
-    ) {}
+    public function __construct(private string $mailBox, private string $user, private string $password) {}
 
     /** @return resource */
     public function open()
@@ -27,11 +23,7 @@ final class Imap
         return $connection;
     }
 
-    /**
-     * @param resource $connection
-     *
-     * @return Generator
-     */
+    /** @param resource $connection */
     public function fetch($connection): Generator
     {
         $search = imap_search($connection, 'ALL');

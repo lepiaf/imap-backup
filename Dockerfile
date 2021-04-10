@@ -1,6 +1,6 @@
 FROM php:8.0-cli
 
-VOLUME data
+VOLUME /opt/data
 
 RUN apt-get update \
   && apt-get install -y libzip-dev git libkrb5-dev libc-client-dev \
@@ -14,5 +14,7 @@ WORKDIR /opt
 COPY . .
 
 RUN composer install
+
+USER 1000
 
 CMD ["php", "main.php"]
