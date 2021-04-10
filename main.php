@@ -26,6 +26,7 @@ foreach ($client->fetch($connection) as $mail) {
     if (false === $result) {
         echo 'ERROR Cannot save email '.$fileName.PHP_EOL;
         $exitCode = 1;
+        continue;
     }
 
     echo 'SUCCESS save email '.$fileName.PHP_EOL;

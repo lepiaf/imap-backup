@@ -15,6 +15,4 @@ COPY . .
 
 RUN composer install
 
-USER 1000
-
 CMD ["php", "main.php"]
